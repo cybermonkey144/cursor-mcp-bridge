@@ -10,3 +10,6 @@ dependencies = [
 
 [project.scripts]
 cursor-agent-mcp = "server:mcp.run"
+
+[tool.setuptools]
+py-modules = ["server", "agent_runner", "session_store"]
