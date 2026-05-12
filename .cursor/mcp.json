@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "cursor-agent": {
+      "command": "/home/beast/code/cursor_agent_tool/.venv/bin/python3",
+      "args": ["/home/beast/code/cursor_agent_tool/server.py"],
+      "env": {}
+    }
+  }
+}

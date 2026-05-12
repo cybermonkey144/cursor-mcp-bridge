@@ -1,0 +1,12 @@
+[project]
+name = "cursor-agent-tool"
+version = "0.1.0"
+description = "MCP server exposing Cursor's agent CLI as tools"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastmcp>=3.2.4",
+]
+
+[project.scripts]
+cursor-agent-mcp = "server:mcp.run"
