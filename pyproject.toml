@@ -10,6 +10,11 @@ dependencies = [
 
 [project.scripts]
 cursor-agent-mcp = "server:mcp.run"
+claude-agent-install = "claude_agent_install.installer:main"
 
 [tool.setuptools]
 py-modules = ["server", "agent_runner", "session_store"]
+packages = ["claude_agent_install"]
+
+[tool.setuptools.package-data]
+claude_agent_install = ["*.md"]
