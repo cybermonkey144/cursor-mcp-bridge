@@ -1,6 +1,10 @@
 # cursor-agent-tool
 
-MCP server that exposes [Cursor's agent CLI](https://cursor.com/docs/cli) as tools, letting any MCP-compatible LLM delegate tasks to a full Cursor agent with filesystem, shell, and web access.
+An MCP bridge that lets tools like **Claude Code** harness [Cursor's agent](https://cursor.com/docs/cli) — including its codebase indexing, project-wide context, and tool access — as a delegatable sub-agent.
+
+Cursor's strength is understanding a codebase as a whole: it can pull in semantically-related files, navigate large projects, and reason about how pieces connect. This server exposes that capability through MCP, so a Claude Code session (or any MCP-compatible LLM) can hand off a task — "refactor the auth flow", "explain how X talks to Y" — to a full Cursor agent and get back a structured result with the agent's text, tool calls, and token usage.
+
+The package also ships ready-made **Claude Code subagents** (`cursor-delegator`, `plan-with-cursor`) that already know how to drive these MCP tools. Install them with a single command (see [Install the bundled Claude agents](#install-the-bundled-claude-agents-optional)) and Claude Code can delegate to Cursor with no extra setup.
 
 ## Requirements
 
@@ -8,30 +12,54 @@ MCP server that exposes [Cursor's agent CLI](https://cursor.com/docs/cli) as too
 - Python 3.12+
 - [uv](https://docs.astral.sh/uv/)
 
-## Setup
+## Install
+
+Install the package with `uv` and register it with Claude Code:
 
 ```bash
-git clone <repo>
-cd cursor_agent_tool
-uv sync
+uv tool install git+https://github.com/cybermonkey144/cursor-mcp-bridge
+claude mcp add cursor-agent -- cursor-agent-mcp
 ```
 
-Verify the agent is authenticated:
+That's it. Verify the Cursor agent itself is authenticated:
 
 ```bash
 agent status
 ```
 
-## Connecting to Claude Code
+## Install the bundled Claude agents (optional)
 
-Add to `~/.claude/mcp.json`:
+The package ships two Claude Code subagent definitions that already know how to use these MCP tools:
+
+- **`cursor-delegator`** — delegates coding tasks to Cursor and reports back.
+- **`plan-with-cursor`** — drafts an implementation plan, sends it to Cursor for review, revises until approved.
+
+Install them with:
+
+```bash
+claude-agent-install             # → ~/.claude/agents/ (global, default)
+claude-agent-install --project   # → ./.claude/agents/ (cwd-local)
+claude-agent-install --force     # overwrite existing files without prompting
+```
+
+Global installs make the agents available in every Claude Code session; `--project` scopes them to a single repo.
+
+### Running from a source checkout (development)
+
+If you're hacking on the server, skip the `uv tool install` step and point Claude at the venv directly:
+
+```bash
+git clone https://github.com/cybermonkey144/cursor-mcp-bridge
+cd cursor-mcp-bridge
+uv sync
+```
 
 ```json
 {
   "mcpServers": {
     "cursor-agent": {
-      "command": "/path/to/cursor_agent_tool/.venv/bin/python3",
-      "args": ["/path/to/cursor_agent_tool/server.py"]
+      "command": "/path/to/cursor-mcp-bridge/.venv/bin/python3",
+      "args": ["/path/to/cursor-mcp-bridge/server.py"]
     }
   }
 }
