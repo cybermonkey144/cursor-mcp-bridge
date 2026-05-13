@@ -2,7 +2,7 @@
 
 from typing import Optional
 import fastmcp
-from agent_runner import run_agent, create_session as _create_session, list_models, get_status
+from cursor_runner import run_agent, create_session as _create_session, list_models, get_status
 import session_store
 
 DEFAULT_MODEL = "auto"
