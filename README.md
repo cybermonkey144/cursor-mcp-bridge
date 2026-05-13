@@ -162,3 +162,26 @@ Session IDs are UUIDs persisted to `~/.cursor/mcp_sessions.json`. They survive M
 ## Default model
 
 `auto` — Cursor selects the best available model. Override per-call with the `model` parameter using any ID from `available_models`.
+
+## Troubleshooting
+
+### MCP server fails to start: "Cannot find the Cursor `agent` binary"
+
+The server resolves the `agent` CLI at startup. If it is not on the PATH that the MCP server inherits (common in non-interactive shells, such as the one Claude Code uses), set the `CURSOR_AGENT_PATH` environment variable to its absolute path.
+
+In your Claude Code MCP config (`~/.claude/settings.json` or project `.claude/settings.json`):
+
+```json
+{
+  "mcpServers": {
+    "cursor-agent": {
+      "command": "cursor-agent-mcp",
+      "env": {
+        "CURSOR_AGENT_PATH": "/home/youruser/.local/bin/agent"
+      }
+    }
+  }
+}
+```
+
+Find the path with `which agent` in a terminal where Cursor is installed.

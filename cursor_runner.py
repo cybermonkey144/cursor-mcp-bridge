@@ -1,9 +1,65 @@
 """Subprocess wrapper around the `agent` CLI with stream-json parsing."""
 
 import json
+import os
+import shutil
 import subprocess
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Optional
+
+
+_FALLBACK_CANDIDATES = [
+    Path.home() / ".local" / "bin" / "agent",
+    Path("/usr/local/bin/agent"),
+    Path.home() / "bin" / "agent",
+    Path("/opt/homebrew/bin/agent"),
+    Path("/usr/bin/agent"),
+]
+
+
+def _resolve_agent_binary() -> str:
+    raw = os.environ.get("CURSOR_AGENT_PATH")
+    if raw is not None and raw.strip():
+        resolved = str(Path(raw.strip()).resolve())
+        if os.path.isfile(resolved) and os.access(resolved, os.X_OK):
+            return resolved
+        raise RuntimeError(
+            f'CURSOR_AGENT_PATH is set to "{raw}" but that path does not '
+            "exist or is not executable.\n\n"
+            "Fix: set CURSOR_AGENT_PATH to the correct absolute path to the "
+            "`agent` binary, or unset it to let the server find `agent` "
+            "automatically.\n\n"
+            "Verify your install: run `agent --version` in a terminal where "
+            "it works, then `which agent` to find its location."
+        )
+
+    which_result = shutil.which("agent")
+    if which_result:
+        return str(Path(which_result).resolve())
+
+    for candidate in _FALLBACK_CANDIDATES:
+        if candidate.is_file() and os.access(candidate, os.X_OK):
+            return str(candidate.resolve())
+
+    raise RuntimeError(
+        "Cannot find the Cursor `agent` binary.\n\n"
+        "Tried:\n"
+        "  - CURSOR_AGENT_PATH env var (not set)\n"
+        '  - shutil.which("agent")\n'
+        "  - ~/.local/bin/agent, /usr/local/bin/agent, ~/bin/agent,\n"
+        "    /opt/homebrew/bin/agent, /usr/bin/agent\n\n"
+        "Fix options:\n"
+        "  1. Add the directory containing `agent` to PATH, then restart "
+        "the MCP server.\n"
+        "  2. Set CURSOR_AGENT_PATH=/absolute/path/to/agent in the MCP "
+        "server's env config.\n\n"
+        "Verify your install: run `agent --version` in a terminal where "
+        "it works, then `which agent` to find its location."
+    )
+
+
+_AGENT_BIN: str = _resolve_agent_binary()
 
 
 @dataclass
@@ -36,7 +92,7 @@ def run_agent(
     yolo: bool = False,
     timeout: int = 300,
 ) -> AgentResult:
-    cmd = ["agent", "--print", "--output-format", "stream-json", "--trust"]
+    cmd = [_AGENT_BIN, "--print", "--output-format", "stream-json", "--trust"]
 
     if session_id:
         cmd += ["--resume", session_id]
@@ -147,7 +203,7 @@ def _normalise_tool_name(key: str) -> str:
 
 def create_session() -> str:
     proc = subprocess.run(
-        ["agent", "create-chat"],
+        [_AGENT_BIN, "create-chat"],
         capture_output=True,
         text=True,
         timeout=30,
@@ -157,7 +213,7 @@ def create_session() -> str:
 
 def list_models() -> list[dict]:
     proc = subprocess.run(
-        ["agent", "--list-models"],
+        [_AGENT_BIN, "--list-models"],
         capture_output=True,
         text=True,
         timeout=30,
@@ -173,7 +229,7 @@ def list_models() -> list[dict]:
 
 def get_status() -> dict:
     proc = subprocess.run(
-        ["agent", "status"],
+        [_AGENT_BIN, "status"],
         capture_output=True,
         text=True,
         timeout=30,
