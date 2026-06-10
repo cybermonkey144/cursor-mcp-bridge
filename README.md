@@ -44,6 +44,17 @@ claude-agent-install --force     # overwrite existing files without prompting
 
 Global installs make the agents available in every Claude Code session; `--project` scopes them to a single repo.
 
+## Install for Antigravity
+
+Two additional commands populate a project-local `.agents/` directory at the repository root, matching the config layout Antigravity reads:
+
+```bash
+cursor-agent-mcp-config    # → ./.agents/mcp_config.json (registers the cursor-agent MCP server)
+cursor-agent-agents-install # → ./.agents/agents/{agent_name}/agent.json (one per bundled agent)
+```
+
+Both accept `--force` to overwrite existing files without prompting. `cursor-agent-mcp-config` merges the `cursor-agent` entry into any existing `mcpServers` map rather than replacing the whole file.
+
 ### Running from a source checkout (development)
 
 If you're hacking on the server, skip the `uv tool install` step and point Claude at the venv directly:
