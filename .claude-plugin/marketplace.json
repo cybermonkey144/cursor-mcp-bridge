@@ -1,0 +1,12 @@
+{
+  "name": "cursor-agent-tool",
+  "owner": { "name": "Ruby Gross" },
+  "description": "Delegate coding tasks to Cursor's agent CLI from Claude Code, via MCP.",
+  "plugins": [
+    {
+      "name": "cursor-agent-tool",
+      "source": "./",
+      "description": "MCP server exposing Cursor's agent CLI as tools, plus bundled cursor-delegator and plan-with-cursor subagents."
+    }
+  ]
+}

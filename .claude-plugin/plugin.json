@@ -1,0 +1,8 @@
+{
+  "name": "cursor-agent-tool",
+  "description": "MCP server exposing Cursor's agent CLI as tools (run/plan/ask, multi-turn sessions), plus bundled cursor-delegator and plan-with-cursor subagents.",
+  "author": { "name": "Ruby Gross" },
+  "homepage": "https://github.com/cybermonkey144/cursor-mcp-bridge",
+  "repository": "https://github.com/cybermonkey144/cursor-mcp-bridge",
+  "keywords": ["mcp", "cursor", "subagent", "delegation"]
+}

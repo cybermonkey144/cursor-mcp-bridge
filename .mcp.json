@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "cursor-agent": {
+      "command": "uvx",
+      "args": ["--from", "${CLAUDE_PLUGIN_ROOT}", "cursor-agent-mcp"]
+    }
+  }
+}

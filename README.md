@@ -14,22 +14,33 @@ The package also ships ready-made **Claude Code subagents** (`cursor-delegator`,
 
 ## Install
 
-Install the package with `uv` and register it with Claude Code:
+The recommended way is as a Claude Code plugin — it registers the MCP server and both bundled subagents in one step, with no separate Python install:
+
+```
+/plugin marketplace add cybermonkey144/cursor-mcp-bridge
+/plugin install cursor-agent-tool@cursor-agent-tool
+```
+
+Claude Code runs the server via `uvx --from <plugin dir> cursor-agent-mcp`, so it always executes in place from wherever the plugin is cached — no `uv tool install` step, no manual `claude mcp add`.
+
+Verify the Cursor agent itself is authenticated:
+
+```bash
+agent status
+```
+
+### Manual install (without the plugin system)
+
+Install the package with `uv` and register it with Claude Code yourself:
 
 ```bash
 uv tool install git+https://github.com/cybermonkey144/cursor-mcp-bridge
 claude mcp add cursor-agent -- cursor-agent-mcp
 ```
 
-That's it. Verify the Cursor agent itself is authenticated:
+## Install the bundled Claude agents (optional, manual-install only)
 
-```bash
-agent status
-```
-
-## Install the bundled Claude agents (optional)
-
-The package ships two Claude Code subagent definitions that already know how to use these MCP tools:
+Plugin installs already get both subagents automatically (see [Install](#install) above). If you used the manual install path instead, the package ships console scripts to place the same two subagent definitions:
 
 - **`cursor-delegator`** — delegates coding tasks to Cursor and reports back.
 - **`plan-with-cursor`** — drafts an implementation plan, sends it to Cursor for review, revises until approved.
