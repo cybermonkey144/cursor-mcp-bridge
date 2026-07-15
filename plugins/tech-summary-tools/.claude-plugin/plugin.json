@@ -1,0 +1,8 @@
+{
+  "name": "tech-summary-tools",
+  "description": "Generate Cursor-verified technical summary docs and check them for staleness against the code they describe.",
+  "author": { "name": "Ruby Gross" },
+  "homepage": "https://github.com/cybermonkey144/cursor-mcp-bridge",
+  "repository": "https://github.com/cybermonkey144/cursor-mcp-bridge",
+  "keywords": ["docs", "documentation", "cursor", "freshness"]
+}
