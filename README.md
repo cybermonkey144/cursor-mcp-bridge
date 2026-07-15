@@ -29,6 +29,22 @@ Verify the Cursor agent itself is authenticated:
 agent status
 ```
 
+### Optional: tech-summary-tools plugin
+
+This marketplace also ships a second, independent plugin: `tech-summary-tools`, providing
+`/tech-summary` and `/check-docs` skills for generating and maintaining verified technical
+summary docs. `/tech-summary` delegates the heavy code-reading to Cursor via this same MCP
+server, so it requires `cursor-agent-tool` (above) to also be installed.
+
+```
+/plugin install tech-summary-tools@cursor-agent-tool
+```
+
+- **`/tech-summary <topic>`** — Cursor reads the code, Claude verifies every claim against
+  the real files, then writes a dated, source-linked summary to `docs/`.
+- **`/check-docs`** — diffs each summary's recorded sources against git history to report
+  which docs have drifted since they were last verified.
+
 ### Manual install (without the plugin system)
 
 Install the package with `uv` and register it with Claude Code yourself:
