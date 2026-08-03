@@ -3,11 +3,16 @@
 import json
 import os
 import shutil
+import signal
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
+
+# Process-group signalling (setsid, killpg) is POSIX-only. On Windows we fall
+# back to killing just the agent process.
+_POSIX = os.name == "posix"
 
 _FALLBACK_CANDIDATES = [
     Path.home() / ".local" / "bin" / "agent",
@@ -107,14 +112,43 @@ def run_agent(
 
     cmd.append(prompt)
 
-    proc = subprocess.run(
+    # start_new_session puts the agent in its own process group so a timeout
+    # can take down everything it spawned, not just the agent itself.
+    proc = subprocess.Popen(
         cmd,
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
-        timeout=timeout,
+        start_new_session=_POSIX,
     )
 
-    return _parse_stream(proc.stdout, proc.returncode, proc.stderr)
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        _kill_process_tree(proc)
+        stdout, stderr = proc.communicate()
+        result = _parse_stream(stdout or "", -1, stderr or "")
+        result.is_error = True
+        result.error_message = (
+            f"Agent timed out after {timeout}s and was killed. "
+            f"Recovered {len(result.tool_calls)} tool calls and "
+            f"{len(result.text)} chars of text before the cutoff. "
+            "The workspace may contain partial changes."
+        )
+        return result
+
+    return _parse_stream(stdout, proc.returncode, stderr)
+
+
+def _kill_process_tree(proc: subprocess.Popen) -> None:
+    """SIGKILL the agent and any processes it started."""
+    if _POSIX:
+        try:
+            os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+            return
+        except (ProcessLookupError, PermissionError):
+            pass  # already gone, or not ours to signal — fall through
+    proc.kill()
 
 
 def _parse_stream(output: str, returncode: int, stderr: str) -> AgentResult:
