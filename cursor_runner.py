@@ -90,7 +90,7 @@ def run_agent(
     model: Optional[str] = None,
     mode: Optional[str] = None,   # "plan" | "ask" | None
     yolo: bool = False,
-    timeout: int = 300,
+    timeout: int = 600,
 ) -> AgentResult:
     cmd = [_AGENT_BIN, "--print", "--output-format", "stream-json", "--trust"]
 
